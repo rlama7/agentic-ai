@@ -1,0 +1,71 @@
+# =========================
+# macOS
+# =========================
+
+.DS_Store
+
+
+# =========================
+# Environment Variables
+# =========================
+
+.env
+.env.*
+!.env.example
+
+
+# =========================
+# Python
+# =========================
+
+__pycache__/
+*.py[cod]
+*.pyo
+
+.venv/
+venv/
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+*.egg-info/
+dist/
+build/
+
+
+# =========================
+# Jupyter
+# =========================
+
+.ipynb_checkpoints/
+
+
+# =========================
+# Node
+# =========================
+
+node_modules/
+
+dist/
+build/
+
+.vite/
+coverage/
+
+
+# =========================
+# Logs
+# =========================
+
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+
+# =========================
+# IDE
+# =========================
+
+.vscode/
+.idea/
