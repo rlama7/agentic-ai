@@ -73,4 +73,8 @@ def execute_chart_code(
         "df": df,
     }
 
+    # NOTE:
+    # This executes LLM-generate Python code directly.
+    # Acceptable for this demo, but production system should
+    # sandbox or validated generated code before execution
     exec(code, exec_globals)
