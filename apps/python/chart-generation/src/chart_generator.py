@@ -78,6 +78,3 @@ def execute_chart_code(
     # Acceptable for this demo, but production system should
     # sandbox or validated generated code before execution
     exec(code, exec_globals)
-
-## Acknowledgement:
-This project is a local, modular
