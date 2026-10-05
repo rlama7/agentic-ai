@@ -1,5 +1,6 @@
 import sqlite3
 from pathlib import Path
+from src.validator import validate_read_only_sql
 
 import pandas as pd
 
@@ -35,6 +36,11 @@ def get_schema() -> str:
 
 
 def execute_sql(query: str) -> pd.DataFrame:
+    is_valid, reason = validate_read_only_sql(query)
+
+    if not is_valid:
+        return pd.DataFrame({"error": [reason]})
+
     conn = sqlite3.connect(DB_PATH)
 
     try:
