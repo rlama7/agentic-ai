@@ -59,22 +59,28 @@ def main() -> None:
     # else:
     #     result_v2 = execute_sql(sql_v2)
 
+    workflow_result = run_sql_workflow(question=QUESTION)
+
     print("User Question:")
     print(QUESTION)
 
-    run_sql_workflow(question=QUESTION)
+    for attempt in workflow_result.attempts:
+        print(f"\n--- Attempt {attempt.attempt} ---")
 
-    # print("\nSQL V1:")
-    # print(sql_v1)
+        print("\nSQL:")
+        print(attempt.sql)
 
-    # print("\nV1 Result:")
-    # print(result_v1)
+        print("\nResult:")
+        print(attempt.result)
 
-    # print("\nReflection Correct?:")
-    # print(is_correct)
+        print("\nReflection Correct?:")
+        print(attempt.is_correct)
 
-    # print("\nReflection Feedback:")
-    # print(feedback)
+        print("\nReflection Feedback:")
+        print(attempt.feedback)
+
+    print("\nWorkflow Success:")
+    print(workflow_result.succeeded)
 
     # print("\nSQL V2:")
     # print(sql_v2)
