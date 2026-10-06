@@ -23,6 +23,8 @@ def get_response(
             input=prompt,
         )
 
+        print(f"called LLM model: {model}\n")
+
         return response.output_text.strip()
     except Exception as error:
         raise RuntimeError(f"LLM request failed: {error}") from error

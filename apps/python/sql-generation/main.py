@@ -5,7 +5,11 @@ from src.db import (
     execute_sql,
 )
 
-from src.llm_client import get_response
+from src.sql_generator import generate_sql
+
+# from src.llm_client import get_response
+
+QUESTION = "Which color of product has the highest total sales?"
 
 
 def main() -> None:
@@ -28,9 +32,18 @@ def main() -> None:
     # print("\nUnsafe Query Result:")
     # print(unsafe_result)
 
-    response = get_response("Reply with exactly: LLM client working")
+    # response = get_response("Reply with exactly: LLM client working")
+    # print(response)
 
-    print(response)
+    schema = get_schema()
+
+    sql_v1 = generate_sql(question=QUESTION, schema=schema)
+
+    print("User Question:")
+    print(QUESTION)
+
+    print("\nGenerated SQL V1:")
+    print(sql_v1)
 
 
 if __name__ == "__main__":
