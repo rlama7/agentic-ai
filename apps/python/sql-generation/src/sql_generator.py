@@ -6,16 +6,21 @@ DEFAULT_MODEL = "gpt-4o-mini"
 def generate_sql(
     question: str,
     schema: str,
+    database_context: str,
     model: str = DEFAULT_MODEL,
 ) -> str:
     prompt = f"""
 You are a SQL assistant.
 
-Given the SQLite database schema and the user's question,
-write one read-only SQL SELECT query tha answers the question.
+Given the SQLite database schema, database semantics,
+and the user's question, write one read-only SQL SELECT query
+that answers the question.
 
 Database schema:
 {schema}
+
+Database semantis:
+{database_context}
 
 User question:
 {question}

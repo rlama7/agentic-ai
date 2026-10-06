@@ -1,4 +1,4 @@
-from src.db import execute_sql, get_schema
+from src.db import execute_sql, get_schema, get_database_context
 from src.reflection import reflect_on_sql
 from src.sql_generator import generate_sql
 
@@ -10,10 +10,10 @@ def run_sql_workflow(
     max_attempts: int = MAX_ATTEMPTS,
 ) -> None:
     schema = get_schema()
+    database_context = get_database_context()
 
     current_sql = generate_sql(
-        question=question,
-        schema=schema,
+        question=question, schema=schema, database_context=database_context
     )
 
     for attempt in range(1, max_attempts + 1):
@@ -28,7 +28,11 @@ def run_sql_workflow(
         print(result)
 
         is_correct, feedback, refined_sql = reflect_on_sql(
-            question=question, sql_query=current_sql, result=result, schema=schema
+            question=question,
+            sql_query=current_sql,
+            result=result,
+            schema=schema,
+            database_context=database_context,
         )
 
         print("\nReflection Correct?:")

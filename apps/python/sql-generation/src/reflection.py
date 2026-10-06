@@ -11,6 +11,7 @@ def reflect_on_sql(
     sql_query: str,
     result: pd.DataFrame,
     schema: str,
+    database_context: str,
     model: str = DEFAULT_MODEL,
 ) -> tuple[bool, str, str]:
     result_text = result.to_markdown(index=False)
@@ -25,6 +26,9 @@ User question:
 
 Database schema:
 {schema}
+
+Database semantics:
+{database_context}
 
 SQL query:
 {sql_query}

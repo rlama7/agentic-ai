@@ -49,3 +49,27 @@ def execute_sql(query: str) -> pd.DataFrame:
         return pd.DataFrame({"error": [str(error)]})
     finally:
         conn.close()
+
+
+def get_database_context() -> str:
+    conn = sqlite3.connect(DB_PATH)
+
+    try:
+        action_rows = conn.execute("""
+            SELECT DISTINCT action
+            FROM transactions
+            ORDER BY action;
+            """).fetchall()
+
+        actions = [row[0] for row in action_rows]
+
+        return (
+            "Database semantics:\n"
+            f"- Valid action values: {', '.join(actions)}\n"
+            "- For sale events, qty_delta is negative because inventory decreases.\n"
+            "- For insert and restock events, qty_delta is positive.\n"
+            "- For price_update events, qty_delta is 0.\n"
+            "- Sales revene should us the positive magnitude of units sold."
+        )
+    finally:
+        conn.close()
