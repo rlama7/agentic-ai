@@ -1,13 +1,14 @@
-from src.db import (
-    DB_PATH,
-    get_transaction_count,
-    get_schema,
-    execute_sql,
-)
+# from src.db import (
+#     DB_PATH,
+#     get_transaction_count,
+#     get_schema,
+#     execute_sql,
+# )
+from src.workflow import run_sql_workflow
 
-from src.sql_generator import generate_sql
+# from src.sql_generator import generate_sql
 
-from src.reflection import reflect_on_sql
+# from src.reflection import reflect_on_sql
 
 # from src.llm_client import get_response
 
@@ -37,47 +38,49 @@ def main() -> None:
     # response = get_response("Reply with exactly: LLM client working")
     # print(response)
 
-    schema = get_schema()
+    # schema = get_schema()
 
     # Step 1: Generate SQL V1
-    sql_v1 = generate_sql(question=QUESTION, schema=schema)
+    # sql_v1 = generate_sql(question=QUESTION, schema=schema)
 
     # Step 2: Execute V1
-    result_v1 = execute_sql(sql_v1)
+    # result_v1 = execute_sql(sql_v1)
 
     # Step 3: Reflect on V1
-    is_correct, feedback, sql_v2 = reflect_on_sql(
-        question=QUESTION, sql_query=sql_v1, result=result_v1, schema=schema
-    )
+    # is_correct, feedback, sql_v2 = reflect_on_sql(
+    #     question=QUESTION, sql_query=sql_v1, result=result_v1, schema=schema
+    # )
 
     # Step 4: Execute V2 if refinement is needed
 
-    if is_correct:
-        sql_v2 = sql_v1
-        result_v2 = result_v1
-    else:
-        result_v2 = execute_sql(sql_v2)
+    # if is_correct:
+    #     sql_v2 = sql_v1
+    #     result_v2 = result_v1
+    # else:
+    #     result_v2 = execute_sql(sql_v2)
 
     print("User Question:")
     print(QUESTION)
 
-    print("\nSQL V1:")
-    print(sql_v1)
+    run_sql_workflow(question=QUESTION)
 
-    print("\nV1 Result:")
-    print(result_v1)
+    # print("\nSQL V1:")
+    # print(sql_v1)
 
-    print("\nReflection Correct?:")
-    print(is_correct)
+    # print("\nV1 Result:")
+    # print(result_v1)
 
-    print("\nReflection Feedback:")
-    print(feedback)
+    # print("\nReflection Correct?:")
+    # print(is_correct)
 
-    print("\nSQL V2:")
-    print(sql_v2)
+    # print("\nReflection Feedback:")
+    # print(feedback)
 
-    print("\nV2 Result:")
-    print(result_v2)
+    # print("\nSQL V2:")
+    # print(sql_v2)
+
+    # print("\nV2 Result:")
+    # print(result_v2)
 
 
 if __name__ == "__main__":

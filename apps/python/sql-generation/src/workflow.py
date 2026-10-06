@@ -1,0 +1,50 @@
+from src.db import execute_sql, get_schema
+from src.reflection import reflect_on_sql
+from src.sql_generator import generate_sql
+
+MAX_ATTEMPTS = 3
+
+
+def run_sql_workflow(
+    question: str,
+    max_attempts: int = MAX_ATTEMPTS,
+) -> None:
+    schema = get_schema()
+
+    current_sql = generate_sql(
+        question=question,
+        schema=schema,
+    )
+
+    for attempt in range(1, max_attempts + 1):
+        print(f"\n--- Attempt {attempt} ---")
+
+        print("\nSQL:")
+        print(current_sql)
+
+        result = execute_sql(current_sql)
+
+        print("\nResult:")
+        print(result)
+
+        is_correct, feedback, refined_sql = reflect_on_sql(
+            question=question, sql_query=current_sql, result=result, schema=schema
+        )
+
+        print("\nReflection Correct?:")
+        print(is_correct)
+
+        print("\nReflection Feedback:")
+        print(feedback)
+
+        if is_correct:
+            print("\nWorkflow completed successfully.")
+
+            return
+
+        current_sql = refined_sql
+
+    print(
+        f"\nWorkflow stopped after {max_attempts} attempts"
+        "without a confirmed correct result."
+    )
