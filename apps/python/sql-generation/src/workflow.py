@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import pandas as pd
 
-from src.db import execute_sql, get_schema, get_database_context
+from src.db import execute_sql, get_database_context, get_schema
 from src.reflection import reflect_on_sql
 from src.sql_generator import generate_sql
 

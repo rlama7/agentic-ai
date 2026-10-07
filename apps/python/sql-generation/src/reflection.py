@@ -1,4 +1,5 @@
 import json
+
 import pandas as pd
 
 from src.llm_client import get_response
@@ -19,7 +20,8 @@ def reflect_on_sql(
     prompt = f"""
 You are a SQL reviewer and refiner.
 
-Evaluate whether the SQL query and its actual execution result fully answer the user's question.
+Evaluate whether the SQL query and its actual execution result 
+fully answer the user's question.
 
 User question:
 {question}
@@ -45,7 +47,8 @@ Return STRICT JSON with exactly these fields:
 }}
 
 Requirements:
-- Set "is_correct" to true only if the result fully and meaningfully answers the user's question.
+- Set "is_correct" to true only if the result fully and meaningfully answers 
+the user's question.
 - If the result is incorrect, explain the issue briefly.
 - If refinement is needed, provide and improved SQL query.
 - Only use the transaction table.

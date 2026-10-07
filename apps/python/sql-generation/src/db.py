@@ -1,8 +1,9 @@
 import sqlite3
 from pathlib import Path
-from src.validator import validate_read_only_sql
 
 import pandas as pd
+
+from src.validator import validate_read_only_sql
 
 DB_PATH = Path("data/products.db")
 

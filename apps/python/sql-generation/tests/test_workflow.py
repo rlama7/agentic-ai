@@ -1,4 +1,5 @@
 from unittest.mock import patch
+
 from src.workflow import run_sql_workflow
 
 QUESTION = "Which color has the highest total sales?"
