@@ -13,6 +13,14 @@ def test_get_schema_contains_transaction_table() -> None:
     assert "unit_price (REAL)" in schema
 
 
+def test_get_database_context_contains_sale_semantics() -> None:
+    context = get_database_context()
+
+    assert "sale" in context
+    assert "qty_delta is negative" in context
+    assert "Sales revene should us the positive magnitude of units sold." in context
+
+
 def test_execute_sql_returns_rows_for_safe_query() -> None:
     result = execute_sql("""
         SELECT color, action, qty_delta
