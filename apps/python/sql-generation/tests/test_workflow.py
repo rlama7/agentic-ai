@@ -116,3 +116,52 @@ def test_workflow_stops_after_max_attempts() -> None:
     assert result.attempts[2].sql.strip() == sql_v3.strip()
 
     assert all(attempt.is_correct is False for attempt in result.attempts)
+
+
+def test_workflow_handles_unsafe_generated_sql() -> None:
+    unsafe_sql = """
+    DELETE FROM transactions;
+    """
+    safe_sql = """
+    SELECT color
+    FROM transactions
+    WHERE action = 'sale'
+    LIMIT 1;
+    """
+
+    with (
+        patch(
+            "src.workflow.generate_sql",
+            return_value=unsafe_sql,
+        ),
+        patch(
+            "src.workflow.reflect_on_sql",
+            side_effect=[
+                (
+                    False,
+                    "The generated SQL is unsafe and must be replaced.",
+                    safe_sql,
+                ),
+                (
+                    True,
+                    "The query is now safe and valid.",
+                    safe_sql,
+                ),
+            ],
+        ),
+    ):
+        result = run_sql_workflow(
+            question=QUESTION,
+            max_attempts=MAX_ATTEMPTS,
+        )
+
+    assert result.succeeded is True
+    assert len(result.attempts) == 2
+
+    first_result = result.attempts[0].result
+
+    assert "error" in first_result.columns
+    assert first_result.iloc[0]["error"] == "Only SELECT queries are allowed."
+
+    assert result.attempts[0].is_correct is False
+    assert result.attempts[1].is_correct is True
