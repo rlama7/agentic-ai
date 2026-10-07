@@ -86,7 +86,13 @@ def run_sql_workflow(
 
         current_sql = refined_sql
 
-    print(
-        f"\nWorkflow stopped after {max_attempts} attempts"
-        "without a confirmed correct result."
+    return WorkflowResult(
+        question=question,
+        attempts=attempts,
+        succeeded=False,
     )
+
+    # print(
+    #     f"\nWorkflow stopped after {max_attempts} attempts"
+    #     "without a confirmed correct result."
+    # )
