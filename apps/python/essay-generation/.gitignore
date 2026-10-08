@@ -1,0 +1,25 @@
+# Virtual environment
+.venv/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Testing and linting
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Editors and OS
+.vscode/
+.DS_Store
+
+# Generated essays
+output/*
+!output/.gitkeep
