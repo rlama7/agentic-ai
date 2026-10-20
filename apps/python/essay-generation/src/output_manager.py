@@ -3,7 +3,7 @@ from pathlib import Path
 from src.workflow import EssayResult
 
 
-def save_ssay_result(
+def save_essay_result(
     result: EssayResult,
     output_dir: Path,
 ) -> None:
