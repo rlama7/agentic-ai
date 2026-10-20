@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from src.output_manager import save_essay_result
+from src.output_manager import create_run_directory, save_essay_result
 from src.workflow import EssayResult
 
 
@@ -117,3 +117,23 @@ def test_save_result_preserves_unicode(
     assert (output_dir / "revised.md").read_text(
         encoding="utf-8",
     ) == result.revised_draft
+
+
+def test_create_run_directory_creates_unique_directories(
+    tmp_path: Path,
+) -> None:
+    base_dir = tmp_path / "output"
+
+    first_run = create_run_directory(base_dir)
+    second_run = create_run_directory(base_dir)
+
+    assert first_run.exists()
+    assert second_run.exists()
+
+    assert first_run.is_dir()
+    assert second_run.is_dir()
+
+    assert first_run != second_run
+
+    assert first_run.parent == base_dir
+    assert second_run.parent == base_dir
