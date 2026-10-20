@@ -1,3 +1,5 @@
+import pytest
+
 from src.workflow import run_essay_workflow
 
 
@@ -25,6 +27,24 @@ class FakeLLMClient:
         )
 
         return self.responses[len(self.calls) - 1]
+
+
+class FailingLLMClient:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def generate(
+        self,
+        prompt: str,
+        model: str = "openai:gpt-4o",
+        temperature: float = 1.0,
+    ) -> str:
+        self.calls += 1
+
+        if self.calls == 2:
+            raise RuntimeError("Reflection API request failed")
+
+        return "Initial essay draft."
 
 
 def test_workflow_executes_all_three_stages() -> None:
@@ -58,3 +78,17 @@ def test_workflow_executes_all_three_stages() -> None:
         "openai:o4-mini",
         "openai:gpt-4o",
     ]
+
+
+def test_workflow_stops_when_reflection_fails() -> None:
+    client = FailingLLMClient()
+
+    with pytest.raises(
+        RuntimeError,
+        match="Reflection API request failed",
+    ):
+        run_essay_workflow(
+            topic="AI in Education",
+            client=client,
+        )
+    assert client.calls == 2
