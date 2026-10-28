@@ -1,4 +1,4 @@
-aisuite[openai]
+aisuite[openai, mcp]
 python-dotenv
 requests
 qrcode[pil]
