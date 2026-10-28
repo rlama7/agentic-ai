@@ -1,0 +1,5 @@
+aisuite[openai]
+python-dotenv
+requests
+qrcode[pil]
+pytest
