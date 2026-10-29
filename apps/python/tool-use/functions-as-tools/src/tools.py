@@ -1,7 +1,9 @@
 from datetime import datetime
 from pathlib import Path
 
+import qrcode
 import requests
+from qrcode.image.styledpil import StyledPilImage
 
 
 def get_current_time() -> str:
@@ -89,3 +91,70 @@ def write_txt_file(file_path: str, content: str) -> str:
 
     # Return the saved path
     return str(destination)
+
+
+def generate_qr_code(
+    data: str,
+    filename: str,
+    image_path: str = "",
+) -> str:
+    """
+    Generate a QR code PNG with an optional embedded logo.
+
+    Args:
+        data: URL or text to encode.
+        filename: Output filename without .png extension.
+        image_path: Optional logo filename inside assets/.
+
+    Returns:
+        Path to the generated QR code.
+    """
+
+    # Resolve directories relative to the project root
+    project_root = Path(__file__).resolve().parent.parent
+    output_dir = project_root / "output"
+    assets_dir = project_root / "assets"
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Validate QR data and output filename
+    if not data.strip():
+        raise ValueError("QR code data cannot be empty.")
+
+    if (
+        not filename
+        or Path(filename).name != filename
+        or filename in {".", ".."}
+        or filename.endswith(".png")
+    ):
+        raise ValueError("Provide a filename without paths or .png extension.")
+
+    # Configure QR code with high error correction
+    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H)
+    qr.add_data(data)
+    qr.make(fit=True)
+
+    # Optional: embed a local logo into the QR code
+    if image_path:
+        if Path(image_path).name != image_path:
+            raise ValueError("Logo must be a filename inside assets/.")
+
+        logo_path = assets_dir / image_path
+
+        if not logo_path.is_file():
+            raise FileNotFoundError(f"Logo not found: {logo_path}")
+
+        img = qr.make_image(
+            image_factory=StyledPilImage,
+            embedded_image_path=str(logo_path),
+        )
+
+    else:
+        # Generate an oridinary QR code without a logo
+        img = qr.make_image(fill_color="black", back_color="white")
+
+    # Save the final PNG inside output/
+    output_file = output_dir / f"{filename}.png"
+    img.save(output_file)
+
+    return str(output_file)
