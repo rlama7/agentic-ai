@@ -9,6 +9,64 @@ from src.tools import (
 )
 
 
+def print_tool_trace(response) -> None:
+    """Print tool calls and results from the AISuite response."""
+
+    print("\n--- Tool Execution Trace ---")
+
+    # AISuite may expose intermediate turns in response.messages
+    history = getattr(response, "messages", None)
+
+    if history is None:
+        print("Intermediate tool history is not available.")
+        return
+
+    for message in history:
+        role = (
+            message.get("role")
+            if isinstance(message, dict)
+            else getattr(message, "role", None)
+        )
+
+        if role == "assistant":
+            tool_calls = (
+                message.get("tool_calls")
+                if isinstance(message, dict)
+                else getattr(message, "tool_calls", None)
+            )
+
+            for call in tool_calls or []:
+                function = (
+                    call.get("function")
+                    if isinstance(call, dict)
+                    else getattr(call, "function", None)
+                )
+
+                name = (
+                    function.get("name")
+                    if isinstance(function, dict)
+                    else getattr(function, "name", None)
+                )
+
+                arguments = (
+                    function.get("arguments")
+                    if isinstance(function, dict)
+                    else getattr(function, "arguments", None)
+                )
+
+                print(f"\nLLM requested: {name}")
+                print(f"Arguments: {arguments}")
+
+        elif role == "tool":
+            content = (
+                message.get("content")
+                if isinstance(message, dict)
+                else getattr(message, "content", None)
+            )
+
+            print(f"Tool returned: {content}")
+
+
 def main() -> None:
     """Demonstrate multi-tool orchestration using AISuite."""
 
@@ -52,6 +110,9 @@ def main() -> None:
             tools=tools,
             max_turns=10,
         )
+
+        # Tool traces
+        print_tool_trace(response)
 
         # Display the final response
         print("\n--- Final Assistant Response ---")
