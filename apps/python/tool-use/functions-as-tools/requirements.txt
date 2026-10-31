@@ -1,0 +1,6 @@
+aisuite[openai, mcp]
+python-dotenv
+requests
+qrcode[pil]
+pytest
+ruff
