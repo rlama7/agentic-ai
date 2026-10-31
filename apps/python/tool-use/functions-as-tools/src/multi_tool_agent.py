@@ -7,8 +7,11 @@ from src.tools import (
     get_weather_from_ip,
     write_txt_file,
 )
+from src.tracing import trace_tool
 
 
+# AISuite's final response does not expose
+# ntermediate history through resposne.message in the # installed version
 def print_tool_trace(response) -> None:
     """Print tool calls and results from the AISuite response."""
 
@@ -96,10 +99,10 @@ def main() -> None:
 
     # Make all four tools available to the LLM
     tools = [
-        get_current_time,
-        get_weather_from_ip,
-        write_txt_file,
-        generate_qr_code,
+        trace_tool(get_current_time),
+        trace_tool(get_weather_from_ip),
+        trace_tool(write_txt_file),
+        trace_tool(generate_qr_code),
     ]
 
     try:
