@@ -67,3 +67,31 @@ def get_email(message_id: str) -> dict:
         "subject": headers.get("subject", ""),
         "date": headers.get("date", ""),
     }
+
+
+def search_emails(query: str, max_results: int = 5) -> list[dict]:
+    """Search Gmail message using Gmail search operators."""
+
+    # Validate the search query before making an API request.
+    if not query.strip():
+        raise ValueError("Search query cannot be empty.")
+
+    # Reuse our existing OAuth authentication.
+    credentials = get_credentials()
+
+    # Build the Gmail API client.
+    service = build("gmail", "v1", credentials=credentials)
+
+    # Ask Gmail to search messages matching the query.
+    response = (
+        service.users()
+        .messages()
+        .list(
+            userId="me",
+            q=query,
+            maxResults=max_results,
+        )
+        .execute()
+    )
+
+    return response.get("messages", [])
