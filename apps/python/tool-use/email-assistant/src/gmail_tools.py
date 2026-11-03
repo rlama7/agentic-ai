@@ -95,3 +95,30 @@ def search_emails(query: str, max_results: int = 5) -> list[dict]:
     )
 
     return response.get("messages", [])
+
+
+def search_unread_from_sender(
+    sender: str,
+    max_results: int = 5,
+) -> list[dict]:
+    """Find unread Gmail messages from a specific sender."""
+
+    # Reject empty sender values.
+    sender = sender.strip()
+
+    if not sender:
+        raise ValueError("Sender cannot be empty.")
+
+    # Prevent Gmail search operators from being injected
+    # into what should be a single sender address.
+    if (
+        any(char.isspace() for char in sender)
+        or "@" not in sender
+        or any(char in sender for char in '<>"{}()')
+    ):
+        raise ValueError("Provide a valid sender email address.")
+
+    # Reuse our general purpose Gmail search tool.
+    query = f"from: {sender} is:unread"
+
+    return search_emails(query, max_results=max_results)

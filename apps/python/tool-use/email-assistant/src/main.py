@@ -2,29 +2,37 @@
 
 from googleapiclient.errors import HttpError
 
-from .gmail_tools import get_email, search_emails
+from .gmail_tools import get_email, search_unread_from_sender
 
 
 def main() -> None:
-    """Search Gmail and display matching email metadata."""
+    """Search unread messages from a specified sender."""
+
+    sender = "no-reply@zoom.us"
 
     print("Agentic AI Email Assistant")
 
     # Search for unread messages in the test Gmail account.
-    query = "from:zoom.us"
+    # query = "from:zoom.us"
     # query = "is:unread"
-    print(f"Searching Gmail: {query}")
+    print(f"Searching unread emails from: {sender}")
 
     try:
         # First retrieve a small list of message IDs.
-        messages = search_emails(query, max_results=3)
+        # messages = search_emails(query, max_results=3)
         # messages = list_emails(max_results=2)
 
+        # Find unread messages matching the sender
+        messages = search_unread_from_sender(
+            sender=sender,
+            max_results=3,
+        )
+
         if not messages:
-            print("No matching emails found.")
+            print("No unread messages found.")
             return
 
-        print(f"Retrieved {len(messages)} matching messages.")
+        print(f"Found {len(messages)} matching messages.")
 
         # Retrieve metadata for each message ID.
         for message in messages:
@@ -32,7 +40,7 @@ def main() -> None:
 
             print("\n--- Email ---")
             print(f"From: {email['sender']}")
-            print(f"To: {email['recipient']}")
+            # print(f"To: {email['recipient']}")
             print(f"Subject: {email['subject']}")
             print(f"Date: {email['date']}")
 
