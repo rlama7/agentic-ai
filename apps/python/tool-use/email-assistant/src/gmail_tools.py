@@ -122,3 +122,30 @@ def search_unread_from_sender(
     query = f"from: {sender} is:unread"
 
     return search_emails(query, max_results=max_results)
+
+
+def mark_email_as_read(message_id: str) -> dict:
+    """Mark one Gmail message as ready by removing its UNREAD label."""
+
+    if not message_id.strip():
+        raise ValueError("Message ID cannot be empty.")
+
+    credentials = get_credentials()
+    service = build("gmail", "V1", credentials=credentials)
+
+    # Remove only the UNREAD label
+    response = (
+        service.users()
+        .messages()
+        .modify(
+            userId="me",
+            id=message_id,
+            body={"removeLabelIds": ["UNREAD"]},
+        )
+        .execute()
+    )
+
+    return {
+        "id": response["id"],
+        "read": "UNREAD" not in response.get("labelIds", []),
+    }
