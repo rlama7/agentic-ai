@@ -1,51 +1,33 @@
 """CLI entry point for the Agentic AI Email Assistant."""
 
-from googleapiclient.errors import HttpError
+import os
 
-from .gmail_tools import get_email, search_unread_from_sender
+from dotenv import load_dotenv
+
+from .agent import run_agent
 
 
 def main() -> None:
-    """Search unread messages from a specified sender."""
+    """Execute a natural-language Gmail request."""
 
-    sender = "no-reply@zoom.us"
+    load_dotenv()
+
+    if not os.getenv("OPENAI_API_KEY"):
+        print("Error: OPENAI_API_KEY is not configured.")
+        return
+
+    request = "Find unread emails from no-reply@zoom.us"
 
     print("Agentic AI Email Assistant")
-
-    # Search for unread messages in the test Gmail account.
-    # query = "from:zoom.us"
-    # query = "is:unread"
-    print(f"Searching unread emails from: {sender}")
+    print(f"[USER] {request}")
 
     try:
-        # First retrieve a small list of message IDs.
-        # messages = search_emails(query, max_results=3)
-        # messages = list_emails(max_results=2)
+        result = run_agent(request)
+        print(f"\n[AGENT RESPONSE] \n{result}")
 
-        # Find unread messages matching the sender
-        messages = search_unread_from_sender(
-            sender=sender,
-            max_results=3,
-        )
-
-        if not messages:
-            print("No unread messages found.")
-            return
-
-        print(f"Found {len(messages)} matching messages.")
-
-        # Retrieve metadata for each message ID.
-        for message in messages:
-            email = get_email(message["id"])
-
-            print("\n--- Email ---")
-            print(f"From: {email['sender']}")
-            # print(f"To: {email['recipient']}")
-            print(f"Subject: {email['subject']}")
-            print(f"Date: {email['date']}")
-
-    except (FileNotFoundError, HttpError) as error:
-        print(f"Gmail Search error: {error}")
+    except Exception as error:
+        print(f"Agent execution failed: {type(error).__name__}")
+        raise
 
 
 if __name__ == "__main__":
