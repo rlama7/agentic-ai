@@ -5,6 +5,9 @@ import aisuite as ai
 from .gmail_tools import (
     get_email as gmail_get_email,
 )
+from .gmail_tools import (
+    mark_email_as_read as gmail_mark_email_as_read,
+)
 from .gmail_tools import search_emails as gmail_search_emails
 from .gmail_tools import (
     search_unread_from_sender as gmail_search,
@@ -68,6 +71,54 @@ def get_email(message_id: str) -> dict:
     return email
 
 
+def mark_email_as_read(message_id: str) -> dict:
+    """Mark as Gmail message as read only after explicit user approval.
+
+    Args:
+        message_id: Gmail message ID returned by a search tool.
+    """
+    print("\n[TOOL START] mark_email_as_read")
+
+    # Validate before making any Gmail request.
+    if not message_id.strip():
+        raise ValueError("Message ID cannot be empty.")
+
+    # Retrieve metadata so the user knows what will change.
+    email = gmail_get_email(message_id)
+
+    print("\n[APPROVAL REQUIRED]")
+    print("Proposed action: MARD AS READ")
+    print(f"From: {email['sender']}")
+    print(f"Subject: {email['subject']}")
+
+    # The operation is denied unless the user explicityly approves.
+    try:
+        approval = input("\nType YES to approved: ").strip()
+    except (EOFError, KeyboardInterrupt):
+        approval = ""
+
+    if approval != "YES":
+        print("[TOOL RESULT] Action cancelled")
+        print("[TOOL END]\n")
+
+        return {
+            "status": "cancelled",
+            "message": "User did not approve the modification.",
+        }
+
+    # Execute the Gmail write operation only after approval
+    result = gmail_mark_email_as_read(message_id)
+
+    print("[TOOL RESULT] Modification completed")
+    print("[TOOL END]\n")
+
+    return {
+        "status": "success" if result["read"] else "failed",
+        "message_id": result["id"],
+        "read": result["read"],
+    }
+
+
 def run_agent(request: str) -> str:
     """Run the Gmail assistant with two read-only tools."""
 
@@ -79,21 +130,26 @@ def run_agent(request: str) -> str:
             {
                 "role": "system",
                 "content": (
-                    "You are a read-only Gmail assistant. "
-                    "Use the provided tools to answer the user's request. "
-                    "Search for matching messages before retrieving metadata. "
-                    "Do not invent email contents or message details. "
-                    "If no messages match, explain that clearly."
+                    "You are a Gmail email assistant. "
+                    "Use the available tools to fulfill the user's request. "
+                    "Search for messages before retrieving their metadata. "
+                    "Only mark a message as read when explicitly requested. "
+                    "The mark_email_as_read tool enforces user approval. "
+                    "Never bypass or misrepresent the approval result. "
+                    "If the user cancels, report that no modification was made. "
+                    "Do not invent email details or claim actions succeeded "
+                    "unless the tool confirms success."
                 ),
             },
             {"role": "user", "content": request},
         ],
         tools=[
             search_unread_from_sender,
-            get_email,
             search_emails,
+            get_email,
+            mark_email_as_read,
         ],
-        max_turns=5,
+        max_turns=6,
     )
 
     return response.choices[0].message.content or ""

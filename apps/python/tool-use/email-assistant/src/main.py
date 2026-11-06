@@ -17,7 +17,7 @@ def main() -> None:
         return
 
     request = (
-        "Find unread emails from no-reply@zoom.us and tell me how many were retrieved."
+        "Find the most recent unread email from no-reply@zoom.us and mark it as read."
     )
     # request = (
     #     "Find upto 3 emails with AI in the subject and tell me how many you found."
