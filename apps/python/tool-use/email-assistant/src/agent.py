@@ -2,6 +2,7 @@
 
 import aisuite as ai
 
+from .approval import request_approval
 from .gmail_tools import (
     get_email as gmail_get_email,
 )
@@ -86,18 +87,15 @@ def mark_email_as_read(message_id: str) -> dict:
     # Retrieve metadata so the user knows what will change.
     email = gmail_get_email(message_id)
 
-    print("\n[APPROVAL REQUIRED]")
-    print("Proposed action: MARK AS READ")
-    print(f"From: {email['sender']}")
-    print(f"Subject: {email['subject']}")
+    approved = request_approval(
+        action="MARK AS READ",
+        details={
+            "From": email["sender"],
+            "Subject": email["subject"],
+        },
+    )
 
-    # The operation is denied unless the user explicityly approves.
-    try:
-        approval = input("\nType YES to approve: ").strip()
-    except (EOFError, KeyboardInterrupt):
-        approval = ""
-
-    if approval != "YES":
+    if not approved:
         print("[TOOL RESULT] Action cancelled")
         print("[TOOL END]\n")
 
@@ -106,11 +104,8 @@ def mark_email_as_read(message_id: str) -> dict:
             "message": "User did not approve the modification.",
         }
 
-    # Execute the Gmail write operation only after approval
+    # Execute only after explicit approval
     result = gmail_mark_email_as_read(message_id)
-
-    print("[TOOL RESULT] Modification completed")
-    print("[TOOL END]\n")
 
     return {
         "status": "success" if result["read"] else "failed",
