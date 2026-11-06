@@ -17,8 +17,17 @@ def main() -> None:
         return
 
     request = (
-        "Find the most recent unread email from no-reply@zoom.us and mark it as read."
+        "Find emails from no-reply@zoom.us with "
+        "'Missed the Webinar' in the subject. "
+        "Retrieve the metadata and identify the email "
+        "whose exact subject is "
+        "'Missed the Webinar? Watch the Replay | "
+        "Exclusive AI Webinar Deals Close Today at 4:00 PM ET' "
+        "and whose Date header is November 2, 2026. "
+        "Mark only that message as unread. "
+        "Do not modify any other messages."
     )
+
     # request = (
     #     "Find upto 3 emails with AI in the subject and tell me how many you found."
     # )

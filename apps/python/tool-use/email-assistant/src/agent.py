@@ -9,6 +9,7 @@ from .gmail_tools import (
 from .gmail_tools import (
     mark_email_as_read as gmail_mark_email_as_read,
 )
+from .gmail_tools import mark_email_as_unread as gmail_mark_email_as_unread
 from .gmail_tools import search_emails as gmail_search_emails
 from .gmail_tools import (
     search_unread_from_sender as gmail_search,
@@ -114,6 +115,51 @@ def mark_email_as_read(message_id: str) -> dict:
     }
 
 
+def mark_email_as_unread(message_id: str) -> dict:
+    """Mark a Gmail message as unread after explicit user approval.
+
+    Args:
+        message_id: Gmail message ID returned by a search tool.
+    """
+    print("\n[TOOL START] mark_email_as_unread")
+
+    if not message_id.strip():
+        raise ValueError("Message ID cannot be empty.")
+
+    # Retrieve message metadata for the approval preview.
+    email = gmail_get_email(message_id)
+
+    approved = request_approval(
+        action="MARK AS UNREAD",
+        details={
+            "From": email["sender"],
+            "Subject": email["subject"],
+            "Date": email["date"],
+        },
+    )
+
+    if not approved:
+        print("[TOOL RESULT] Action cancelled")
+        print("[TOOL END]\n")
+
+        return {
+            "status": "cancelled",
+            "message": "User did not approve the modification.",
+        }
+
+    # Only executed after explicit approval.
+    result = gmail_mark_email_as_unread(message_id)
+
+    print("[TOOL RESULT] Modification completed")
+    print("[TOOL END]\n")
+
+    return {
+        "status": "success" if result["unread"] else "failed",
+        "message_id": result["id"],
+        "unread": result["unread"],
+    }
+
+
 def run_agent(request: str) -> str:
     """Run the Gmail assistant with two read-only tools."""
 
@@ -134,6 +180,17 @@ def run_agent(request: str) -> str:
                     "If the user cancels, report that no modification was made. "
                     "Do not invent email details or claim actions succeeded "
                     "unless the tool confirms success."
+                    "Only mark a message as unread when explicitly requested. "
+                    "The mark_email_as_unread tool requires user approval. "
+                    "Never report a modification as successful if approval "
+                    "was denied or the tool failed. "
+                    "Use short Gmail search phrases to discover candidate messages. "
+                    "Do not use long quoted subjects or date filters unless necessary. "
+                    "When a specific message is requested, use get_email to verify "
+                    "its exact sender, subject, and date before "
+                    "requesting modification. "
+                    "If no exact match exists or multiple candidates remain ambiguous, "
+                    "do not perform any modification. "
                 ),
             },
             {"role": "user", "content": request},
@@ -143,6 +200,7 @@ def run_agent(request: str) -> str:
             search_emails,
             get_email,
             mark_email_as_read,
+            mark_email_as_unread,
         ],
         max_turns=6,
     )
