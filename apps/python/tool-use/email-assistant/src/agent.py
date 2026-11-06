@@ -87,13 +87,13 @@ def mark_email_as_read(message_id: str) -> dict:
     email = gmail_get_email(message_id)
 
     print("\n[APPROVAL REQUIRED]")
-    print("Proposed action: MARD AS READ")
+    print("Proposed action: MARK AS READ")
     print(f"From: {email['sender']}")
     print(f"Subject: {email['subject']}")
 
     # The operation is denied unless the user explicityly approves.
     try:
-        approval = input("\nType YES to approved: ").strip()
+        approval = input("\nType YES to approve: ").strip()
     except (EOFError, KeyboardInterrupt):
         approval = ""
 
