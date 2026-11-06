@@ -149,3 +149,33 @@ def mark_email_as_read(message_id: str) -> dict:
         "id": response["id"],
         "read": "UNREAD" not in response.get("labelIds", []),
     }
+
+
+def get_email_status(message_id: str) -> dict:
+    """Retrieve the current read/unread status of a Gmail message."""
+
+    if not message_id.strip():
+        raise ValueError("Message ID cannot be empty.")
+
+    credentials = get_credentials()
+    service = build("gmail", "V1", credentials=credentials)
+
+    # Read the messages' current labels from Gmail.
+    message = (
+        service.users()
+        .messages()
+        .get(
+            userId="me",
+            id=message_id,
+            format="minimal",
+        )
+        .execute()
+    )
+
+    labels = message.get("labelIds", [])
+
+    return {
+        "id": message["id"],
+        "read": "UNREAD" not in labels,
+        "labels": labels,
+    }
