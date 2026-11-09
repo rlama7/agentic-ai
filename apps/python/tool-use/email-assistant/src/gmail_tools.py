@@ -1,5 +1,8 @@
 """Gmail tools for the Email Assistant."""
 
+import base64
+from email.message import EmailMessage
+
 from googleapiclient.discovery import build
 
 from .gmail_auth import get_credentials
@@ -205,4 +208,40 @@ def get_email_status(message_id: str) -> dict:
         "id": message["id"],
         "read": "UNREAD" not in labels,
         "labels": labels,
+    }
+
+
+def create_draft(recipient: str, subject: str, body: str) -> dict:
+    """Create an unsent Gmail draft."""
+
+    if not recipient.strip() or not subject.strip() or not body.strip():
+        raise ValueError("Recipient, subject, and body are required.")
+
+    # Construct a standard MIME email message.
+    message = EmailMessage()
+    message["To"] = recipient
+    message["Subject"] = subject
+    message.set_content(body)
+
+    # Gmail expects a base64url-encoded MIME message.
+    encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode("utf-8")
+
+    credentials = get_credentials()
+    service = build("gmail", "v1", credentials=credentials)
+
+    # Save to Drafts. This does NOT send the email.
+    response = (
+        service.users()
+        .drafts()
+        .create(
+            userId="me",
+            body={"message": {"raw": encoded_message}},
+        )
+        .execute()
+    )
+
+    return {
+        "draft_id": response["id"],
+        "message_id": response["message"]["id"],
+        "status": "draft_created",
     }
