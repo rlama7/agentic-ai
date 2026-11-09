@@ -1,8 +1,11 @@
 """AISuite orchestration for the Gmail Email Assistant."""
 
+import os
+
 import aisuite as ai
 
 from .approval import request_approval
+from .gmail_tools import create_draft as gmail_create_draft
 from .gmail_tools import (
     get_email as gmail_get_email,
 )
@@ -160,6 +163,60 @@ def mark_email_as_unread(message_id: str) -> dict:
     }
 
 
+def create_draft(recipient: str, subject: str, body: str) -> dict:
+    """Create a Gmail draft after explicit user approval
+
+    Args:
+        recipient: Email address of the intended recipient.
+        subject: Subject for the email draft.
+        body: Plain-text content of the email draft.
+    """
+    print("\n[TOOL START] create_draft")
+    print("f[ARGUMENTS] recipient={recipient}")
+
+    # Restrict draft creation to our configured test account.
+    allowed_recipient = os.getenv("GMAIL_TEST_RECIPIENT", "").strip()
+
+    if not allowed_recipient or (
+        recipient.strip().casefold() != allowed_recipient.casefold()
+    ):
+        print("[TOOL RESULT] Recipient not authorized")
+        print("[TOOL END]\n")
+
+        return {
+            "status": "denied",
+            "message": "Recipient is not the configured test account.",
+        }
+
+    # Reuse our existing human approval mechanism.
+    approved = request_approval(
+        action="CREATE GMAIL DRAFT",
+        details={
+            "To": recipient,
+            "Subject": subject,
+            "Body": body,
+        },
+    )
+
+    if not approved:
+        print("[TOOL RESULT] Draft creation cancelled")
+        print("[TOOL END]\n")
+
+        return {"status": "cancelled", "message": "User declined draft creation."}
+
+    # Only save the draft after authorization.
+    result = gmail_create_draft(recipient, subject, body)
+
+    print("[TOOL RESULT] Draft created successfully")
+    print("[TOOL END]\n")
+
+    return {
+        "status": "success",
+        "draft_id": result["draft_id"],
+        "message": "Draft saved in Gmail. Email not sent.",
+    }
+
+
 def run_agent(request: str) -> str:
     """Run the Gmail assistant with two read-only tools."""
 
@@ -191,6 +248,13 @@ def run_agent(request: str) -> str:
                     "requesting modification. "
                     "If no exact match exists or multiple candidates remain ambiguous, "
                     "do not perform any modification. "
+                    "Create an email draft only when the user explicitly requests one. "
+                    "Provide a clear, concise subject and plain-text body. "
+                    "The create_draft tool requires human approval. "
+                    "Never claim a draft was saved unless the tool reports success. "
+                    "Never send an email. "
+                    "If draft creation is denied or cancelled, do not retry it "
+                    "within the same request. "
                 ),
             },
             {"role": "user", "content": request},
@@ -201,6 +265,7 @@ def run_agent(request: str) -> str:
             get_email,
             mark_email_as_read,
             mark_email_as_unread,
+            create_draft,
         ],
         max_turns=6,
     )
