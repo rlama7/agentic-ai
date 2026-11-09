@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 
 from .agent import run_agent
+from .privacy import mask_email
 
 
 def main() -> None:
@@ -49,7 +50,7 @@ def main() -> None:
     # )
 
     print("Agentic AI Email Assistant")
-    print(f"[USER] {request}")
+    print(f"[USER] {request.replace(recipient, mask_email(recipient))}")
 
     try:
         result = run_agent(request)

@@ -17,6 +17,7 @@ from .gmail_tools import search_emails as gmail_search_emails
 from .gmail_tools import (
     search_unread_from_sender as gmail_search,
 )
+from .privacy import mask_email
 
 
 def search_unread_from_sender(sender: str) -> list[dict]:
@@ -172,7 +173,7 @@ def create_draft(recipient: str, subject: str, body: str) -> dict:
         body: Plain-text content of the email draft.
     """
     print("\n[TOOL START] create_draft")
-    print("f[ARGUMENTS] recipient={recipient}")
+    print(f"[ARGUMENTS] recipient={mask_email(recipient)}")
 
     # Restrict draft creation to our configured test account.
     allowed_recipient = os.getenv("GMAIL_TEST_RECIPIENT", "").strip()
@@ -192,7 +193,7 @@ def create_draft(recipient: str, subject: str, body: str) -> dict:
     approved = request_approval(
         action="CREATE GMAIL DRAFT",
         details={
-            "To": recipient,
+            "To": mask_email(recipient),
             "Subject": subject,
             "Body": body,
         },
