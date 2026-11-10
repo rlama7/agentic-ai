@@ -1,19 +1,14 @@
 # === Standard Library ===
-import os
-import re
-import json
 import base64
 import mimetypes
-from pathlib import Path
+import os
+import re
 
 # === Third-Party ===
 import pandas as pd
-import matplotlib.pyplot as plt
-from PIL import Image  # (kept if you need it elsewhere)
+from anthropic import Anthropic
 from dotenv import load_dotenv
 from openai import OpenAI
-from anthropic import Anthropic
-from html import escape
 
 # === Env & Clients ===
 load_dotenv()
@@ -87,10 +82,10 @@ def encode_image_b64(path: str) -> tuple[str, str]:
     return media_type, b64
 
 
-import base64
-from IPython.display import HTML, display
-import pandas as pd
 from typing import Any
+
+import pandas as pd
+from IPython.display import HTML, display
 
 
 def print_html(content: Any, title: str | None = None, is_image: bool = False):

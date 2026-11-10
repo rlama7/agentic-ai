@@ -171,6 +171,7 @@ def trace_tool(func):
         except Exception as error:
             print(f"[TOOL ERROR] {func.__name__}: {error}")
             raise
+
     return wrapper
 ```
 

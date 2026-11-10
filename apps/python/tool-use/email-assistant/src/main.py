@@ -31,6 +31,10 @@ def main() -> None:
         "to demonstrate LLM tool calling and human approval. "
         "Keep the message under 100 words. "
         "Save it as a draft only. Do not send it."
+        "Find the email with the subject "
+        "'Agentic AI - Body Retrieval Test'. "
+        "Read its plain-text body and summarize what the message says "
+        "in one sentence. Do not modify any messages."
     )
 
     # request = (

@@ -5,7 +5,6 @@ from src.chart_generator import (
     extract_python_code,
     generate_chart_code,
 )
-
 from src.data_loader import load_and_prepare_data
 from src.reflection import reflect_on_chart
 

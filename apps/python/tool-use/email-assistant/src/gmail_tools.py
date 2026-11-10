@@ -245,3 +245,66 @@ def create_draft(recipient: str, subject: str, body: str) -> dict:
         "message_id": response["message"]["id"],
         "status": "draft_created",
     }
+
+
+def extract_plain_text(payload: dict) -> str:
+    """Extract plain-text content from a Gmail MIME payload."""
+
+    # Case 1: The current part contains plain text.
+    if payload.get("mimeType") == "text/plain":
+        encoded = payload.get("body", {}).get("data")
+
+        if encoded:
+            # Gmail uses Base64url encoding for message bodies.
+            decoded = base64.urlsafe_b64decode(encoded)
+            return decoded.decode("utf-8", errors="replace")
+
+    # Case 2: Search nested MIME parts recursively.
+    for part in payload.get("parts", []):
+        text = extract_plain_text(part)
+
+        if text:
+            return text
+
+    # No inline plain-text body was found.
+    return ""
+
+
+def get_email_content(message_id: str) -> dict:
+    """Retrieve email metadata and its plain-text body."""
+
+    if not message_id.strip():
+        raise ValueError("Message ID cannot be empty.")
+
+    credentials = get_credentials()
+    service = build("gmail", "v1", credentials=credentials)
+
+    # Request the complete parsed MIME payload.
+    message = (
+        service.users()
+        .messages()
+        .get(
+            userId="me",
+            id=message_id,
+            format="full",
+        )
+        .execute()
+    )
+
+    payload = message.get("payload", {})
+
+    # Normalize header names for consistent lookups.
+    headers = {
+        header["name"].lower(): header["value"] for header in payload.get("headers", [])
+    }
+
+    return {
+        "id": message["id"],
+        "thread_id": message.get("threadId"),
+        "sender": headers.get("from", ""),
+        "recipient": headers.get("to", ""),
+        "subject": headers.get("subject", ""),
+        "date": headers.get("date", ""),
+        "message_id_header": headers.get("message-id", ""),
+        "body": extract_plain_text(payload),
+    }
