@@ -2,6 +2,7 @@
 
 import base64
 from email.message import EmailMessage
+from email.utils import parseaddr
 
 from googleapiclient.discovery import build
 
@@ -244,6 +245,71 @@ def create_draft(recipient: str, subject: str, body: str) -> dict:
         "draft_id": response["id"],
         "message_id": response["message"]["id"],
         "status": "draft_created",
+    }
+
+
+def create_reply_draft(
+    original_message_id: str,
+    reply_body: str,
+    allowed_sender: str,
+) -> dict:
+    """Create an unsent reply draft in an existing Gmail thread."""
+
+    if not original_message_id.strip() or not reply_body.strip():
+        raise ValueError("Message ID and reply body are required.")
+
+    # Retrieve the original email and its conversation identifiers.
+    original = get_email_content(original_message_id)
+
+    sender = parseaddr(original["sender"])[1]
+    subject = original["subject"]
+    thread_id = original["thread_id"]
+    parent_message_id = original["message_id_header"]
+
+    # Restrict this exercise to our controlled test message.
+    if (
+        not allowed_sender
+        or sender.casefold() != allowed_sender.casefold()
+        or subject != "Agentic AI - Body Retrieval Test"
+    ):
+        raise ValueError("Original message is outside the test scope.")
+
+    if not thread_id or not parent_message_id:
+        raise ValueError("Missing required threading information.")
+
+    # Construct the reply using the original message headers.
+    message = EmailMessage()
+    message["To"] = sender
+    message["Subject"] = f"Re: {subject}"
+    message["In-Reply-To"] = parent_message_id
+    message["References"] = parent_message_id
+    message.set_content(reply_body)
+
+    encoded = base64.urlsafe_b64encode(message.as_bytes()).decode("utf-8")
+
+    credentials = get_credentials()
+    service = build("gmail", "v1", credentials=credentials)
+
+    # Associate the new draft with the original conversation.
+    response = (
+        service.users()
+        .drafts()
+        .create(
+            userId="me",
+            body={
+                "message": {
+                    "raw": encoded,
+                    "threadId": thread_id,
+                }
+            },
+        )
+        .execute()
+    )
+
+    return {
+        "draft_id": response["id"],
+        "thread_id": response["message"].get("threadId"),
+        "status": "reply_draft_created",
     }
 
 
