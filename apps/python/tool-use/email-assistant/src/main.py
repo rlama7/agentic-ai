@@ -24,18 +24,29 @@ def main() -> None:
         return
 
     request = (
-        f"Create a Gmail draft addressed to {recipient}. "
-        "Write a short, professional email introducing my "
-        "Agentic AI Email Assistant project. "
-        "Mention that it uses Python, AISuite, and the Gmail API "
-        "to demonstrate LLM tool calling and human approval. "
-        "Keep the message under 100 words. "
-        "Save it as a draft only. Do not send it."
-        "Find the email with the subject "
+        "Find my email with the exact subject "
         "'Agentic AI - Body Retrieval Test'. "
-        "Read its plain-text body and summarize what the message says "
-        "in one sentence. Do not modify any messages."
+        "Read its plain-text body and write a short, friendly, "
+        "professional reply confirming that the test message "
+        "was successfully received and understood. "
+        "Keep the reply under 80 words. "
+        "Create a reply draft in the original Gmail conversation. "
+        "Do not send the email."
     )
+
+    # request = (
+    #     f"Create a Gmail draft addressed to {recipient}. "
+    #     "Write a short, professional email introducing my "
+    #     "Agentic AI Email Assistant project. "
+    #     "Mention that it uses Python, AISuite, and the Gmail API "
+    #     "to demonstrate LLM tool calling and human approval. "
+    #     "Keep the message under 100 words. "
+    #     "Save it as a draft only. Do not send it."
+    #     "Find the email with the subject "
+    #     "'Agentic AI - Body Retrieval Test'. "
+    #     "Read its plain-text body and summarize what the message says "
+    #     "in one sentence. Do not modify any messages."
+    # )
 
     # request = (
     #     "Find emails from no-reply@zoom.us with "
